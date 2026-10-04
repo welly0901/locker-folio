@@ -64,7 +64,7 @@ const projects: ProjectItem[] = [
   /* ---------- 项目1：融媒体中心策划部干事 ---------- */
   {
     id: 1,
-    date: '2023.9 – 2024.6',
+    date: '2023.09 – 2024.06',
     tone: 'green',
     maxHeight: 'max-h-[1000px]',
     title: (
@@ -96,7 +96,7 @@ const projects: ProjectItem[] = [
   /* ---------- 项目2：融媒体中心策划部部长 ---------- */
   {
     id: 2,
-    date: '2024.6 – 2025.6',
+    date: '2024.06 – 2025.06',
     tone: 'rose',
     maxHeight: 'max-h-[1000px]',
     title: (
@@ -169,7 +169,7 @@ const projects: ProjectItem[] = [
   /* ---------- 项目4：融里民俗模拟媒介投放 ---------- */
   {
     id: 4,
-    date: '2025.5',
+    date: '2025.05',
     tone: 'purple',
     maxHeight: 'max-h-[1000px]',
     title: (
@@ -237,7 +237,7 @@ const projects: ProjectItem[] = [
   /* ---------- 项目6：市场部实习 ---------- */
   {
     id: 6,
-    date: '2025.10 – 2026.1',
+    date: '2025.10 – 2026.01',
     tone: 'rose',
     maxHeight: 'max-h-[1000px]',
     title: (
