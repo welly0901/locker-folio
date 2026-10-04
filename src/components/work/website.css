@@ -13,6 +13,11 @@
   align-items: center;
   touch-action: none;
   transition: --glow 0.66s var(--ease-out);
+  /* 卡宽变量挂在共同父级上：.wsc__ring 和作为兄弟节点的 .wsc__nav 都要读
+     同一个值来排版（nav 宽 = 卡宽 + 120px）。原来挂在 ring 上，nav 读不到
+     只能吃 fallback 400px —— 手机卡宽只有 220px，两个箭头就被顶到屏幕外。 */
+  --card-w: clamp(220px, 32vw, 400px);
+  --card-h: min(90vh, calc(var(--card-w) * 5.5));
 }
 
 .wsc__head {
@@ -61,9 +66,7 @@
 }
 
 .wsc__ring {
-  /* 卡片宽度提到 ring 上：面板要按封面的实际宽度定位，两边得读同一个值 */
-  --card-w: clamp(220px, 32vw, 400px);
-  --card-h: min(90vh, calc(var(--card-w) * 5.5));
+  /* --card-w / --card-h 定义在共同父级 .wsc 上，ring 与 .wsc__nav 共用 */
   position: relative;
   z-index: 3;
   flex: 1;
@@ -274,10 +277,4 @@
   letter-spacing: 0.14em;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 760px) {
-  .wsc__panel {
-    display: none;
-  }
 }
