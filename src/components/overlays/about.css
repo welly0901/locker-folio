@@ -330,3 +330,146 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ── 手机：横版工牌在 94vw 宽下高度只剩 ~250px，所有 cqw 字号都被压到
+   5–10px 的下限、底部四栏折成 2×2、绝对定位的中文标题与英文标题重叠。
+   这里整体改排为「竖版工牌」：卡片高度由内容决定，装不下时卡内滚动；
+   字号脱离 cqw 改用可读的固定值，中文标题回到正常文档流。 ─────────── */
+@media (max-width: 680px) {
+  .idc {
+    width: min(94vw, 400px);
+  }
+
+  /* 挂绳缩短，但登山扣仍保持原 SVG 比例不变形 */
+  .idc__lanyard {
+    width: 34px;
+    height: 66px;
+  }
+  .idc__clip {
+    width: 34px;
+    height: 66px;
+  }
+  .idc__strap {
+    width: 26px;
+  }
+
+  .idc__card {
+    aspect-ratio: auto;
+    max-height: calc(100dvh - 86px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+    padding: 12px 14px 0;
+  }
+
+  /* 卡片自身可滚动时，关闭按钮必须固定在视口才不会被滚走 */
+  .idc__card .ov__close {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .idc__frame {
+    padding: 10px 12px;
+    /* 矮屏横置时不能让内容区被 flex 压扁（会和条码区重叠），
+       高度交给内容，超出后由 .idc__card 自身滚动 */
+    flex: 0 0 auto;
+  }
+
+  .idc__no {
+    font-size: 8px;
+  }
+
+  .idc__body {
+    grid-template-columns: 76px 1fr;
+    gap: 12px;
+  }
+
+  .idc__photo {
+    height: auto;
+    padding-bottom: 0;
+    align-self: start;
+  }
+  .idc__avatar {
+    max-width: 76px;
+  }
+
+  .idc__main {
+    padding-top: 0;
+  }
+  .idc__title {
+    font-size: clamp(24px, 6.7vw, 27px);
+    line-height: 0.9;
+  }
+  /* 原先是绝对定位贴右上角，窄屏下与英文标题重叠；改为正常流排在标题下 */
+  .idc__titleCn {
+    position: static;
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+  }
+  .idc__sub {
+    font-size: 8px;
+    margin-top: 6px;
+  }
+  .idc__rule {
+    margin: 8px 0 10px;
+  }
+
+  .idc__fields {
+    gap: 8px 12px;
+    /* dense：学历整行占位后，专业回填到年龄右侧的空位 */
+    grid-auto-flow: row dense;
+  }
+  /* 学历值较长，独占一行避免「本科」折行；自动排布为 姓名|性别 / 年龄|专业 / 学历 */
+  .idc__field:nth-child(4) {
+    grid-column: 1 / -1;
+  }
+  .idc__field dt {
+    font-size: 8.5px;
+  }
+  .idc__field dd {
+    font-size: 12.5px;
+  }
+
+  .idc__stamp {
+    width: 92px;
+  }
+
+  /* 底部：条码独占一行，邮箱/电话一行两列，微信标签占满底行 */
+  .idc__lower {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px 12px;
+    padding: 9px 12px;
+  }
+  .idc__barcode {
+    grid-column: 1 / -1;
+    height: 26px;
+  }
+  .idc__tag {
+    grid-column: 1 / -1;
+  }
+  .idc__ck {
+    font-size: 8px;
+  }
+  .idc__cv {
+    font-size: 11px;
+    word-break: break-all;
+  }
+  .idc__tagTop {
+    font-size: 8px;
+  }
+  .idc__tagBody {
+    font-size: 11px;
+    padding: 5px 0;
+  }
+
+  .idc__foot {
+    margin: 0 -14px;
+    padding: 7px 16px;
+    font-size: 7.6px;
+  }
+}
