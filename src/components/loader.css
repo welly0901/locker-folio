@@ -31,9 +31,13 @@
   margin: 0;
   font-family: var(--font-poster);
   font-weight: 400;
-  font-size: clamp(64px, 15.1vw, 234px);
+  /* 下限不能高于 15.1vw 在最窄目标屏（280px ≈ 42px）给出的值：WELCOME
+     七字实测宽约 6.17em，旧的 64px 下限让单词固定 395px，在 ≤390px 屏上
+     超出视口，而 grid 对超宽子项从左缘向右溢出，右端 E 被裁、整词偏左。 */
+  font-size: clamp(44px, 15.1vw, 234px);
   line-height: 0.74;
   letter-spacing: -0.012em;
+  white-space: nowrap;
   transform: scaleY(1.02);
   transform-origin: center;
   user-select: none;
