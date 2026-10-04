@@ -568,6 +568,43 @@
 /* iOS Safari 聚焦 font-size 小于 16px 的输入框会自动放大整页且不会缩回，
    窄屏必须把输入区提到 16px（§11.2） */
 @media (max-width: 680px) {
+  /* 横版软木板在手机上只有 ~270px 高，打字纸（约 200px）只能压在自述信笺
+     和下载便签上。改为竖版木板，给信笺 / 便签 / 打字纸各留独立的一行。 */
+  .cb {
+    width: min(94vw, 430px);
+    aspect-ratio: 0.7;
+    max-height: 94vh;
+  }
+
+  /* 打字纸（TYPE NOTE 卡片）下移到底部并加宽；打字机模型在纸的下层
+     （aria-hidden 纯装饰），被纸遮住不影响信息 */
+  .cb__paper {
+    width: 90%;
+    min-width: 0;
+    bottom: 4%;
+  }
+  .cb__machine {
+    width: 64%;
+  }
+
+  /* 简历 / 作品集两张下载便签排到自述信笺下方的左右两格 */
+  .cb__note[data-note='s2'] {
+    left: 6% !important;
+    right: auto !important;
+    top: 31.5% !important;
+    bottom: auto !important;
+  }
+  .cb__note[data-note='s3'] {
+    left: auto !important;
+    right: 6% !important;
+    top: 31.5% !important;
+    bottom: auto !important;
+  }
+  /* 纯装饰空白便签收起，窄板上不再占位置 */
+  .cb__note[data-note='s1'] {
+    display: none;
+  }
+
   .cb__input {
     font-size: 16px;
     line-height: 1.45;
