@@ -55,8 +55,8 @@ export default function AwardsGallery() {
     py: 0,
     pxCur: 0,
     pyCur: 0,
-    planeOps: AWARDS.map((_, i) => (i === 0 ? 1 : 0)),
-    toneOps: AWARDS.map((_, i) => (i === 0 ? 1 : 0)),
+    planeOps: AWARDS.map((_, i): number => (i === 0 ? 1 : 0)),
+    toneOps: AWARDS.map((_, i): number => (i === 0 ? 1 : 0)),
     dragging: false,
     axis: '' as '' | 'x' | 'y',
     startX: 0,
@@ -202,7 +202,7 @@ export default function AwardsGallery() {
       const nextI = Math.min(curI + 1, COUNT - 1)
       const frac = s.cur - curI
 
-      AWARDS.forEach((a, i) => {
+      AWARDS.forEach((_a, i) => {
         /* 目标不透明度：只有当前 / 下一张可见 */
         let targetOp = 0
         if (i === curI) targetOp = 1 - frac

@@ -1,5 +1,5 @@
 {
-  "name": "locker-folio",
+  "name": "wangyuxuan91",
   "compatibility_date": "2026-08-21",
   // 纯静态站：没有 Worker 脚本，只把 vite 的产物目录整体托管。
   "assets": {
@@ -8,6 +8,7 @@
     // 不要回落到 index.html —— 那会让缺失的贴图以 200 + HTML 的形式返回，
     // 把「素材 404」伪装成解码失败。
     "not_found_handling": "none"
-  },
-  "routes": [{ "pattern": "locker.zezn.dev", "custom_domain": true }]
+  }
+  // 自定义域名在 Cloudflare 控制台里绑定在本 Worker 上，部署时自动保留，
+  // 不在此声明以免与控制台配置互相覆盖。
 }
