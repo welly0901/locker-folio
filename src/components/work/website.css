@@ -1,0 +1,283 @@
+/* 底色光晕跟着项目换色。渐变本身不可插值，把 --glow 注册成真正的颜色属性
+   才能让它平滑过渡 —— 参考换项目时黄→红→绿是渐变过去的，不是跳变。 */
+@property --glow {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+.wsc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  touch-action: none;
+  transition: --glow 0.66s var(--ease-out);
+}
+
+.wsc__head {
+  position: relative;
+  z-index: 4;
+  margin: clamp(40px, 7vh, 70px) 0 0;
+  font-family: var(--font-slab);
+  font-weight: 400;
+  font-size: clamp(20px, 3.1vw, 40px);
+  letter-spacing: 0.055em;
+  color: var(--rust);
+  text-align: center;
+  animation: wscFade 0.6s var(--ease-out);
+}
+
+@keyframes wscFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.wsc__glow {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  /* 原来 74vw × 58vh 的椭圆到 72% 就已经全透明，铺在 --paper #f8f7fa 上的有效
+     色域不足视口的 1%，等于没有光晕。放大到 112vw × 118vh 才垫得住整块画面；
+     min() 的 1500 × 1000 是上限，免得超宽屏上无限拉伸成一片死色。 */
+  width: min(112vw, 1500px);
+  height: min(118vh, 1000px);
+  transform: translate(-50%, -50%);
+  /* 44% 处用 color-mix 补一个 58% 浓度的中途站，避免实色直接掉到透明的硬边 */
+  background: radial-gradient(
+    closest-side,
+    var(--glow) 0%,
+    color-mix(in srgb, var(--glow) 58%, transparent) 44%,
+    transparent 100%
+  );
+  opacity: 1;
+  /* 径向渐变本身就是连续的，不需要再糊一遍。blur(14px) 是一整屏的滤镜 pass，
+     救不了一个本来就太淡的渐变，只白白吃合成性能，所以直接去掉。 */
+  filter: none;
+  pointer-events: none;
+  /* 颜色本身由 .wsc 上的 --glow 过渡驱动，这里不再过渡不可插值的 background */
+}
+
+.wsc__ring {
+  /* 卡片宽度提到 ring 上：面板要按封面的实际宽度定位，两边得读同一个值 */
+  --card-w: clamp(220px, 32vw, 400px);
+  --card-h: min(90vh, calc(var(--card-w) * 5.5));
+  position: relative;
+  z-index: 3;
+  flex: 1;
+  width: 100%;
+  perspective: 1500px;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  margin-top: -50px;
+}
+
+.wsc__spin {
+  position: relative;
+  width: var(--card-w);
+  height: var(--card-h);
+  transform-style: preserve-3d;
+  /* 环心后退量 = WebsiteCarousel 里的 RADIUS(560)，两处必须一致，卡片
+     rotateY + translateZ(560) 之后才正好落回 z≈0。原来写在内联 style 上，
+     特异性压过任何选择器，下面那条展开态规则根本推不动它。 */
+  transform: translateZ(-560px);
+  transition: transform 0.78s cubic-bezier(0.24, 0.94, 0.24, 1);
+}
+
+/*
+ * 项目切换 = 模糊 + 位移 + 交叉淡化（§3.2）。
+ *
+ * 参考里换项目时，上一张一边左移缩小一边糊掉淡出，下一张自右侧由糊变清推到中间。
+ * 这里位移由环上的 rotateY 给出，所以 transform 必须参与过渡 —— 之前只过渡
+ * opacity / filter，卡片角度是瞬间跳的，看不出「转过去」；模糊则完全没有。
+ */
+.wsc__card {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: transparent;
+  transition:
+    transform 0.72s cubic-bezier(0.24, 0.94, 0.24, 1),
+    opacity 0.62s var(--ease-out),
+    filter 0.62s var(--ease-out);
+  /* 邻片是**远处的一片淡影**，不是并排的第二张卡：参考里它们退到画幅两侧、
+     几乎只剩一道轮廓。曾把环角从 78° 收到 50° 想让它们露出正面，结果三张
+     贴成了一个折屏盒子，反而离参考更远 —— 邻片就该远、就该淡。 */
+  opacity: 0.44;
+  filter: saturate(0.18) brightness(1.06) blur(6px);
+}
+
+.wsc__card[data-active='true'] {
+  opacity: 1;
+  filter: none;
+}
+
+.wsc__card[data-active='true'] img {
+  transform: scale(0.65);
+  box-shadow: 0 16px 40px rgba(40, 44, 58, 0.2);
+}
+
+/* 转过 76° 之后就要看见卡片背面了（阈值怎么来的见 WebsiteCarousel 的 data-gone）；
+   这里没有可靠的 backface-visibility 可用（WebKit 不认，见 design.css 的说明），
+   直接把它淡掉 */
+.wsc__card[data-gone='true'] {
+  opacity: 0;
+}
+
+/* 拖拽时角度每帧都在变，过渡会让卡片追不上手指 */
+.wsc__ring[data-drag='true'] .wsc__card {
+  transition: none;
+}
+
+.wsc__card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 8px;
+  transition: transform 0.3s var(--ease-out);
+}
+
+
+
+/* 展开面板：卡片左移 + 底部白板从下方滑出。 */
+.wsc__ring[data-open='true'] .wsc__spin {
+  transform: translateZ(-520px);
+}
+
+.wsc__panel {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  width: min(92vw, 780px);
+  max-height: 55vh;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: clamp(28px, 3.5vh, 48px) clamp(20px, 2.6vw, 38px);
+  box-shadow: 0 -8px 40px rgba(40, 44, 58, 0.14);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 100%);
+  transition:
+    opacity 0.4s var(--ease-out),
+    transform 0.5s var(--ease-out);
+  z-index: 50;
+  overflow-y: auto;
+}
+
+.wsc__panel[data-show='true'] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.wsc__kicker {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: #2f3fb5;
+}
+
+.wsc__title {
+  margin: 0.85em 0 0;
+  font-family: var(--font-slab);
+  font-weight: 700;
+  font-size: clamp(28px, 3.3vw, 46px);
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  display: flex;
+  flex-direction: column;
+}
+
+.wsc__desc {
+  margin: 1.05em 0 0;
+  font-family: var(--font-cn);
+  font-size: clamp(12px, 1.06vw, 14px);
+  line-height: 1.75;
+  color: var(--ink-soft);
+}
+
+
+
+/* 导航箭头移到图片左右两侧 */
+.wsc__nav {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  width: calc(var(--card-w, 400px) + 120px);
+  pointer-events: none;
+  z-index: 6;
+}
+
+.wsc__nav > * {
+  pointer-events: auto;
+}
+
+.wsc__nav .wsc__arrow:first-child {
+  margin-right: auto;
+}
+
+.wsc__nav .wsc__arrow:last-child {
+  margin-left: auto;
+}
+
+/* 下方文字与控件 */
+.wsc__below {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(12px, 2vh, 22px);
+  padding-bottom: clamp(20px, 4vh, 36px);
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.wsc__below[data-dim='true'] {
+  opacity: 0.28;
+}
+
+
+
+
+
+.wsc__arrow {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(20, 22, 26, 0.28);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  color: var(--ink);
+  transition:
+    background-color 0.32s var(--ease-out),
+    color 0.32s var(--ease-out),
+    border-color 0.32s var(--ease-out);
+}
+
+.wsc__arrow:hover {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: #fff;
+}
+
+.wsc__count {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 760px) {
+  .wsc__panel {
+    display: none;
+  }
+}

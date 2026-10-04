@@ -1,0 +1,249 @@
+.sk {
+  position: relative;
+  width: min(88vw, 430px);
+  aspect-ratio: 1.04;
+  max-height: 62vh;
+  /* 换位过程中卡片会滑到容器外，阴影和边缘不能被裁掉（§10.2） */
+  overflow: visible;
+  /* 展开 / 收回时整阵上抬量跟随过渡，避免跳变 */
+  transition: transform 0.42s var(--ease-out);
+  /* 展开模式的位移与缩放。六张摊成 3 列 × 2 行：卡片本身是绝对定位的整块，
+     缩放整张比逐条改字号可靠：版式不会在两种模式之间变形。位移写成百分比 ——
+     translate 的百分比按元素自身尺寸算，也就是一张卡的宽 / 高，卡组多大间距
+     就跟着多大。x/y 取「相邻卡刚好不重叠」的临界：半卡宽 0.25 + 位移 0.66 ≈ 0.91。 */
+  --sk-fan-x: 66%;
+  --sk-fan-y: 47%;
+  --sk-fan-r: 3deg;
+  --sk-fan-s: 0.5;
+  --sk-fan-front-s: 0.54;
+  /* 下行有前卡，整阵上抬一点，避免它压住底部「收回卡组」按钮 */
+  --sk-fan-lift: 26px;
+}
+
+/* 窄屏仍是同一个 3 × 2 阵列，只是缩到刚好铺满屏宽：
+   390px 上 1.76·x + 0.88·s ≤ 1，取 x=40% / s=0.34 临界不溢出。
+   阵列里字会偏小，点任意一张即可抽到最前正常阅读（与堆叠同一套交互）。 */
+@media (max-width: 860px) {
+  .sk {
+    --sk-fan-x: 40%;
+    --sk-fan-y: 40%;
+    --sk-fan-r: 2deg;
+    --sk-fan-s: 0.34;
+    --sk-fan-front-s: 0.38;
+    --sk-fan-lift: 0px;
+  }
+}
+
+/* 展开时按卡片中心缩放，卡间间距才和上面算出来的一致；
+   堆叠仍以底边为原点（后层卡从底下顶上来的错落感靠它）。
+   同时整阵上抬 --sk-fan-lift（只在展开态，堆叠态不动）。 */
+.sk[data-spread] {
+  transform: translateY(calc(-1 * var(--sk-fan-lift)));
+}
+
+.sk[data-spread] .sk__card {
+  transform-origin: 50% 50%;
+}
+
+/* 展开态：六张都在画面里，阴影收一点，免得互相压出脏边 */
+.sk[data-spread] .sk__card {
+  box-shadow:
+    0 14px 30px rgba(30, 44, 70, 0.16),
+    0 2px 4px rgba(30, 44, 70, 0.08);
+}
+
+/* 堆叠 / 展开切换。放在卡组下方居中，和右上角的关闭按钮分开 */
+.sk__mode {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(18px, 4vh, 40px);
+  transform: translateX(-50%);
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #16181c;
+  color: #fff;
+  font-family: var(--font-cn);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 6px 20px rgba(20, 24, 32, 0.24);
+  transition:
+    background-color 0.3s var(--ease-out),
+    transform 0.3s var(--ease-out);
+  animation: skModeIn 0.46s var(--ease-out) backwards 0.14s;
+}
+
+@keyframes skModeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+}
+
+.sk__mode:hover {
+  background: var(--cyan);
+  transform: translateX(-50%) translateY(-2px);
+}
+
+/* 三根小竖条：堆叠时叠在一起，展开时分开 */
+.sk__mode i {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  width: 18px;
+  justify-content: center;
+}
+
+.sk__mode i span {
+  width: 3px;
+  height: 13px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.32s var(--ease-out);
+}
+
+.sk__mode i:not([data-spread]) span:first-child {
+  transform: translateX(5px);
+}
+
+.sk__mode i:not([data-spread]) span:last-child {
+  transform: translateX(-5px);
+}
+
+/* 只给屏幕阅读器的说明与状态播报 */
+.sk__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.sk__card {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  padding: clamp(20px, 3vw, 34px) clamp(20px, 3.2vw, 36px) clamp(18px, 2.6vw, 30px);
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  overflow: hidden;
+  transform-origin: 50% 100%;
+  box-shadow:
+    0 20px 44px rgba(30, 44, 70, 0.17),
+    0 2px 5px rgba(30, 44, 70, 0.08);
+  /* transform / opacity 的过渡由 SkillsDeck 按换位阶段内联给出 */
+  animation: skIn 0.7s var(--ease-out) backwards var(--in-delay, 0s);
+  will-change: transform;
+}
+
+@keyframes skIn {
+  from {
+    opacity: 0;
+    transform: translateY(52px) scale(0.9);
+  }
+}
+
+/* 入场只跑一次；之后 transform / opacity 完全交给内联过渡，
+   避免 animation 覆盖 transition 造成卡片二次入场 */
+.sk[data-entered] .sk__card {
+  animation: none;
+}
+
+/* Reduced Motion：顺序直接切换，只保留一次短淡化提示层级变了（§10.2 / §11.3）。
+   这里必须用带特异性的 !important 覆盖 global.css 对 * 的动效压制。 */
+@media (prefers-reduced-motion: reduce) {
+  .sk__card[data-stage='back'] {
+    animation: skFade 150ms linear !important;
+  }
+}
+
+@keyframes skFade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* 右上角细圆弧装饰 */
+.sk__arc {
+  position: absolute;
+  right: -22%;
+  top: -14%;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.26;
+  pointer-events: none;
+}
+
+.sk__kicker {
+  font-size: clamp(7.6px, 0.9vw, 10px);
+  letter-spacing: 0.24em;
+  opacity: 0.72;
+  text-transform: uppercase;
+}
+
+.sk__title {
+  margin-top: clamp(10px, 1.6vw, 20px);
+  /* 参考是超粗黑体，不是宋体 */
+  font-family: var(--font-cn);
+  font-weight: 900;
+  font-size: clamp(32px, 5.4vw, 56px);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+}
+
+.sk__desc {
+  margin-top: clamp(4px, 0.5vw, 7px);
+  font-family: var(--font-cn);
+  font-weight: 500;
+  font-size: clamp(11px, 1.15vw, 13px);
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.sk__spacer {
+  flex: 1;
+  min-height: 14px;
+}
+
+.sk__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.sk__row {
+  display: grid;
+  /* 键名最长到 DATA-PROCESS / FOREIGN-LANG（12 字符），列宽按它留足 */
+  grid-template-columns: clamp(84px, 9.5vw, 102px) 1fr;
+  align-items: baseline;
+  gap: 8px;
+  padding: clamp(7px, 1vw, 10px) 0 clamp(5px, 0.7vw, 7px);
+  border-top: 1px solid currentColor;
+}
+
+.sk__row:first-child {
+  border-top-color: currentColor;
+}
+
+.sk__k {
+  font-size: clamp(7.4px, 0.86vw, 9.6px);
+  letter-spacing: 0.16em;
+  opacity: 0.62;
+  text-transform: uppercase;
+}
+
+.sk__v {
+  font-family: var(--font-cn);
+  font-size: clamp(11px, 1.16vw, 13.4px);
+  font-weight: 500;
+}

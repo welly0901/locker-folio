@@ -1,0 +1,126 @@
+.vl__scroll {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+
+.vl__inner {
+  max-width: 1210px;
+  margin: 0 auto;
+  padding: clamp(72px, 9vh, 104px) clamp(24px, 4vw, 50px) 90px;
+}
+
+.vl__item {
+  display: grid;
+  grid-template-columns: minmax(200px, 36%) 1fr;
+  gap: clamp(20px, 4vw, 56px);
+  align-items: center;
+  padding: clamp(28px, 4.6vh, 52px) 0;
+  border-top: 1px solid rgba(20, 22, 26, 0.13);
+  animation: vlIn 0.7s var(--ease-out) backwards;
+}
+
+.vl__item:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+@keyframes vlIn {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+}
+
+.vl__no {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
+  margin-bottom: 0.7em;
+}
+
+.vl__title {
+  margin: 0;
+  font-family: var(--font-poster);
+  font-weight: 400;
+  font-size: clamp(30px, 4.3vw, 56px);
+  line-height: 0.98;
+  letter-spacing: -0.008em;
+  overflow-wrap: anywhere;
+}
+
+.vl__cn {
+  margin: 0.5em 0 0;
+  font-family: var(--font-cn);
+  font-size: clamp(14px, 1.5vw, 19px);
+  font-weight: 500;
+}
+
+.vl__desc {
+  margin: 0.85em 0 0;
+  font-family: var(--font-cn);
+  font-size: clamp(11.5px, 1.05vw, 13px);
+  line-height: 1.7;
+  color: var(--ink-soft);
+  max-width: 34ch;
+}
+
+.vl__cover {
+  position: relative;
+  display: block;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #101215;
+  aspect-ratio: 16 / 9;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.vl__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    transform 0.7s var(--ease-out),
+    filter 0.5s var(--ease-out);
+}
+
+.vl__cover:hover img {
+  transform: scale(1.035);
+  filter: brightness(0.92);
+}
+
+.vl__play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.vl__play svg {
+  width: clamp(48px, 5vw, 64px);
+  height: clamp(48px, 5vw, 64px);
+  opacity: 0.9;
+  transition: transform 0.42s var(--ease-out);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+}
+
+.vl__cover:hover .vl__play svg {
+  transform: scale(1.1);
+}
+
+.vl__end {
+  border-top: 1px solid rgba(20, 22, 26, 0.13);
+  padding-top: 34px;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 720px) {
+  .vl__item {
+    grid-template-columns: 1fr;
+  }
+}

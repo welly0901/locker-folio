@@ -1,0 +1,198 @@
+.fw {
+  position: relative;
+  width: min(96vw, 1180px);
+  aspect-ratio: 1.823;
+  max-height: 94vh;
+}
+
+.fw__star {
+  position: absolute;
+  pointer-events: none;
+  animation: starIn 0.72s var(--ease-out) backwards 0.18s;
+}
+
+@keyframes starIn {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-40deg);
+  }
+}
+
+.fw__star--yellow {
+  left: 20.5%;
+  top: 12.4%;
+  width: 11.7%;
+  animation-name: starIn, starSpinA;
+  animation-duration: 0.72s, 26s;
+  animation-iteration-count: 1, infinite;
+  animation-timing-function: var(--ease-out), linear;
+}
+
+.fw__star--lime {
+  left: 79.2%;
+  top: 69.8%;
+  width: 7.4%;
+  animation-name: starIn, starSpinB;
+  animation-duration: 0.72s, 20s;
+  animation-iteration-count: 1, infinite;
+  animation-timing-function: var(--ease-out), linear;
+}
+
+@keyframes starSpinA {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes starSpinB {
+  to {
+    rotate: -360deg;
+  }
+}
+
+/* ── 文件夹 ─────────────────────────────────────────── */
+.fold {
+  position: absolute;
+  transform: rotate(var(--rot));
+  transform-origin: 50% 60%;
+  transition: transform 0.5s var(--ease-out);
+  animation: foldIn 0.7s var(--ease-out) backwards;
+  perspective: 900px;
+}
+
+@keyframes foldIn {
+  from {
+    opacity: 0;
+    transform: rotate(var(--rot)) translateY(34px) scale(0.92);
+  }
+}
+
+.fold:hover {
+  transform: rotate(calc(var(--rot) * 0.55)) translateY(-6px) scale(1.028);
+  z-index: 9 !important;
+}
+
+/* 后板（含左上突出的标签耳） */
+.fold__back {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  border-radius: 16px;
+  box-shadow: 0 16px 34px rgba(30, 44, 70, 0.16);
+}
+
+.fold__back::before {
+  content: '';
+  position: absolute;
+  left: 3.5%;
+  top: -12%;
+  width: 25%;
+  height: 17%;
+  background: var(--bg);
+  border-radius: 10px 10px 0 0;
+  filter: brightness(0.94);
+}
+
+/* 夹在中间的白色文件 */
+.fold__papers {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 6%;
+  bottom: 26%;
+  display: block;
+}
+
+.fold__papers i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100%;
+  background: #f6f5f2;
+  border-radius: 8px 8px 3px 3px;
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.07);
+  transform: translateY(24%) scale(0.97);
+  opacity: 0;
+  transition:
+    transform 0.52s var(--ease-out),
+    opacity 0.34s var(--ease-out);
+}
+
+.fold__papers i:nth-child(2) {
+  background: #fbfaf8;
+  left: 3%;
+  right: 3%;
+}
+.fold__papers i:nth-child(3) {
+  background: #ffffff;
+  left: 6%;
+  right: 6%;
+}
+
+.fold:hover .fold__papers i {
+  opacity: 1;
+  transform: translateY(-14%) scale(1);
+}
+.fold:hover .fold__papers i:nth-child(2) {
+  transform: translateY(-8%) scale(1);
+  transition-delay: 0.03s;
+}
+.fold:hover .fold__papers i:nth-child(3) {
+  transform: translateY(-2%) scale(1);
+  transition-delay: 0.06s;
+}
+
+/* 前板 */
+.fold__front {
+  position: absolute;
+  inset: 0;
+  top: 8%;
+  background: var(--bg);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12em;
+  padding: 6% 8%;
+  transform-origin: 50% 100%;
+  transition: transform 0.52s var(--ease-out);
+  box-shadow: 0 -2px 12px rgba(30, 44, 70, 0.06);
+}
+
+.fold:hover .fold__front {
+  transform: rotateX(-13deg) translateY(3%);
+}
+
+.fold__en {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-black);
+  color: var(--fg);
+  font-size: clamp(14px, 3.25cqw, 43px);
+  line-height: 0.94;
+  letter-spacing: -0.005em;
+  transform: skewX(-11deg);
+  text-shadow: 1.5px 1.5px 0 rgba(0, 0, 0, 0.16);
+  white-space: nowrap;
+}
+
+.fold__cn {
+  font-family: var(--font-cn);
+  font-weight: 700;
+  color: var(--cnfg);
+  font-size: clamp(9px, 1.34cqw, 18px);
+  letter-spacing: 0.06em;
+  margin-top: 0.2em;
+}
+
+.fw {
+  container-type: inline-size;
+}
+
+@media (max-width: 720px) {
+  .fold__en {
+    font-size: clamp(11px, 3.3cqw, 26px);
+  }
+}

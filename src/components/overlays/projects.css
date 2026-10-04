@@ -1,0 +1,48 @@
+/* Tailwind v4：仅引入 theme + utilities，刻意不引入 preflight ——
+   全局 reset 会改变现有导航 / Loader / 3D 场景 UI 的既有样式。
+   时间轴所需的元素级重置由本文件底部的局部低权重规则承担。 */
+@import 'tailwindcss/theme.css';
+@import 'tailwindcss/utilities.css';
+
+/* ── 浮层集成：时间轴是整页板块，覆盖 .ov 的居中网格 ─────── */
+.ov--pj {
+  display: block;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* 时间轴文字直接铺在浮层上（内容区无独立卡片底色），通用浮层只有 0.34
+     不透明度，柜体透过来会让正文发虚。这里只给 PROJECTS 提到近不透明的
+     暖纸色，保证深色文字可读；其他浮层有自己的实体卡片，不受影响。 */
+  background: rgba(247, 243, 236, 0.88);
+  backdrop-filter: blur(10px) saturate(0.85) brightness(1.02);
+}
+
+@media (max-width: 680px) {
+  .ov--pj {
+    background: rgba(247, 243, 236, 0.92);
+    backdrop-filter: blur(8px) saturate(0.9) brightness(1.02);
+  }
+}
+
+/* ── 局部 preflight（替代 Tailwind 全局 reset）────────────
+   :where() 把权重压到最低：浏览器 UA 样式能被覆盖，
+   而 .bg-[#…] / .font-bold 等 Tailwind 工具类（0,1,0）永远优先。 */
+:where(.ov--pj) button {
+  font: inherit;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:where(.ov--pj) h2,
+:where(.ov--pj) h3,
+:where(.ov--pj) p,
+:where(.ov--pj) ul {
+  margin: 0;
+  padding: 0;
+}
+
+:where(.ov--pj) ul {
+  list-style: none;
+}

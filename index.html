@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f3ec" />
+    <title>WYLIE WANG — PORTFOLIO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ultra&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Archivo+Black&family=Alfa+Slab+One&family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Serif+SC:wght@400;600;900&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--
+      资源请求失败报告（整改方案 §4.3）：
+      资源类 error 事件不冒泡，只能在捕获阶段拿到。这段脚本必须排在下面的
+      preload 之前，才能保证 404 的预加载也被点名。
+    -->
+    <script>
+      window.addEventListener(
+        'error',
+        function (e) {
+          var t = e.target
+          if (!t || t === window) return
+          var url = t.href || t.currentSrc || t.src
+          if (!url) return
+          if (t.tagName === 'LINK' && t.rel === 'preload') {
+            console.error('[preload] 预加载失败，检查 assetManifest 与 index.html 是否漂移：', url)
+          } else if (t.tagName === 'LINK' || t.tagName === 'IMG' || t.tagName === 'SCRIPT') {
+            console.error('[asset] 资源请求失败：', url)
+          }
+        },
+        true,
+      )
+    </script>
+
+    <!--
+      首屏关键预加载。**唯一事实来源是 src/experience/assetManifest.ts 里
+      preload: true 的条目**，两边必须一一对应；开发模式下
+      auditPreloadLinks() 会校验漂移，并确认 URL 真的返回 image/*
+      而不是被 SPA fallback 用 HTML 冒充 200。
+    -->
+    <link rel="preload" as="image" type="image/webp" href="/assets/obj/posterwall.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/obj/findaword2.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/obj2/polaroids.webp" />
+    <link rel="preload" as="image" type="image/webp" href="/assets/obj2/doorDecals.webp" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

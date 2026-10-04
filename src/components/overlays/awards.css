@@ -1,0 +1,383 @@
+/* ============================================================================
+ * AWARDS 深度画廊
+ * 全屏浮层：3D 纵深图片 + 每张图专属的氛围色背景 + 极简编辑式 chrome
+ * ========================================================================== */
+
+.aw {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  overflow: hidden;
+  background: var(--paper, #f7f3ec);
+  color: #3a2f24;
+  font-family: var(--font-en, inherit);
+  animation: awIn 0.5s var(--ease-out, ease-out);
+  /* 浮层宿主点击空白关闭只认 .ov/.idc/.sk；.aw 自己接住全部点击，避免误关 */
+  cursor: default;
+}
+
+@keyframes awIn {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ── 氛围背景 ─────────────────────────────────────────────── */
+
+.aw__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #f7f3ec;
+}
+
+.aw__tone {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      42% 48% at 16% 20%,
+      color-mix(in srgb, var(--blob1) 62%, transparent) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      48% 52% at 86% 82%,
+      color-mix(in srgb, var(--blob2) 58%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(158deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 42%, #f7f3ec) 100%);
+  will-change: opacity;
+}
+
+.aw__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background:
+    linear-gradient(180deg, rgba(60, 44, 28, 0.07), transparent 18%, transparent 82%, rgba(60, 44, 28, 0.09));
+  pointer-events: none;
+}
+
+.aw__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 50% 45%,
+    transparent 55%,
+    rgba(74, 52, 30, 0.14) 100%
+  );
+  pointer-events: none;
+}
+
+/* ── 3D 舞台 ─────────────────────────────────────────────── */
+
+.aw__stageWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  perspective: 1600px;
+  perspective-origin: 50% 46%;
+}
+
+.aw__stage {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  touch-action: none;
+  cursor: grab;
+}
+
+.aw__stage:active {
+  cursor: grabbing;
+}
+
+.aw__plane {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* translate 与 transform 相互独立：-50% 居中由 translate 承担，
+   transform 留给 rAF 写视差 / tilt / 呼吸 */
+.aw__frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.aw__frame img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: clamp(300px, 58vh, 640px);
+  max-width: 82vw;
+  border-radius: 3px;
+  background: #e7dfd0;
+  box-shadow:
+    0 2px 6px rgba(60, 40, 18, 0.12),
+    0 22px 52px rgba(60, 40, 18, 0.32);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Reduced Motion：压平纵深，只留交叉淡入 */
+.aw[data-reduced] .aw__stageWrap {
+  perspective: none;
+}
+
+.aw[data-reduced] .aw__frame img {
+  box-shadow: 0 14px 36px rgba(60, 40, 18, 0.22);
+}
+
+/* ── 顶部 chrome ─────────────────────────────────────────── */
+
+.aw__top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 24px clamp(18px, 3.4vw, 44px);
+  pointer-events: none;
+}
+
+.aw__back {
+  justify-self: start;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid rgba(58, 47, 36, 0.32);
+  border-radius: 999px;
+  background: rgba(247, 243, 236, 0.55);
+  backdrop-filter: blur(8px);
+  color: #3a2f24;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.aw__back:hover {
+  background: rgba(247, 243, 236, 0.9);
+  border-color: rgba(58, 47, 36, 0.6);
+}
+
+.aw__kicker {
+  grid-column: 2;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.aw__kickerEn {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  font-weight: 700;
+  color: rgba(58, 47, 36, 0.78);
+  text-indent: 0.34em;
+}
+
+.aw__kickerCn {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-cn-serif);
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  color: rgba(58, 47, 36, 0.62);
+}
+
+/* ── 左右箭头 ─────────────────────────────────────────────── */
+
+.aw__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  width: 52px;
+  height: 52px;
+  margin-top: -26px;
+  border-radius: 50%;
+  border: 1px solid rgba(58, 47, 36, 0.28);
+  background: rgba(247, 243, 236, 0.55);
+  backdrop-filter: blur(8px);
+  color: #3a2f24;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.aw__arrow:hover:not(:disabled) {
+  background: rgba(247, 243, 236, 0.92);
+  transform: scale(1.06);
+}
+
+.aw__arrow:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.aw__arrow--prev {
+  left: clamp(14px, 2.4vw, 36px);
+}
+
+.aw__arrow--next {
+  right: clamp(14px, 2.4vw, 36px);
+}
+
+/* ── 底部 ───────────────────────────────────────────────── */
+
+.aw__bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 16px;
+  padding: 22px clamp(18px, 3.4vw, 44px) 26px;
+  pointer-events: none;
+}
+
+.aw__counter {
+  justify-self: start;
+  align-self: center;
+  font-style: normal;
+  color: #3a2f24;
+}
+
+.aw__counter b {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.aw__counter i {
+  font-style: normal;
+  margin-left: 6px;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  color: rgba(58, 47, 36, 0.55);
+}
+
+.aw__dots {
+  grid-column: 2;
+  display: flex;
+  gap: 9px;
+  pointer-events: auto;
+}
+
+.aw__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(58, 47, 36, 0.26);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.aw__dot:hover {
+  background: rgba(58, 47, 36, 0.5);
+}
+
+.aw__dot[data-on] {
+  background: #b06a44;
+  transform: scale(1.35);
+}
+
+.aw__hint {
+  justify-self: end;
+  align-self: center;
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  color: rgba(58, 47, 36, 0.5);
+  white-space: nowrap;
+}
+
+/* ── 窄屏 ───────────────────────────────────────────────── */
+
+@media (max-width: 680px) {
+  .aw__top {
+    grid-template-columns: auto 1fr;
+    padding: 16px 16px 0;
+  }
+
+  .aw__kicker {
+    grid-column: 2;
+    text-align: right;
+  }
+
+  .aw__kickerEn {
+    font-size: 9.5px;
+  }
+
+  .aw__back {
+    padding: 8px 14px;
+    font-size: 10px;
+  }
+
+  .aw__frame img {
+    max-height: 56vh;
+    max-width: 78vw;
+  }
+
+  .aw__arrow {
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+    font-size: 22px;
+  }
+
+  .aw__bottom {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+    padding: 16px 18px 20px;
+  }
+
+  .aw__dots {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    justify-self: center;
+  }
+
+  .aw__counter {
+    grid-row: 2;
+  }
+
+  .aw__hint {
+    grid-row: 2;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+
+  .aw__counter b {
+    font-size: 24px;
+  }
+}

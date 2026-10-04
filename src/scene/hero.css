@@ -1,0 +1,175 @@
+/* 首屏 3D 场景的容器。
+   只负责铺满视口和背景底色 —— 立体内容全部在 canvas 里，
+   这里不再有任何用矩形和渐变拼出来的柜体细节（§17）。 */
+
+.hero {
+  position: fixed;
+  inset: 0;
+  /* 与参考一致的高调暖白。参考背景为奶油纸白，
+     所以这里只留极浅的一层落差，不要出现能看出边界的光晕 */
+  background:
+    linear-gradient(180deg, #fbf8f2 0%, #f7f4ee 62%, #f0ece2 100%);
+  touch-action: none;
+}
+
+.hero__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* 开发期的标定辅助线：?grid=1 打开，叠一条 1320×724 的参考框 */
+.hero__calib {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero__calib::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1320px;
+  height: 724px;
+  transform: translate(-50%, -50%);
+  outline: 1px dashed rgba(226, 60, 60, 0.55);
+}
+
+/* ── 柜内热点的无障碍层（§9.1 / §16.4）────────────────────
+   指针交互一律走 canvas 里的 raycaster，所以这一层整体
+   pointer-events: none —— 它只负责键盘 Tab、读屏和 hover/focus 时的文字标签。
+   pointer-events: none 不影响 Tab 顺序，也不影响 Enter / Space 触发 click。 */
+
+.hot3d {
+  pointer-events: none;
+}
+
+.hot3d__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1em;
+  /* §16.4：触控目标不小于 44×44 */
+  min-width: 46px;
+  min-height: 46px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 1px 2px rgba(90, 60, 40, 0.14),
+    0 6px 18px rgba(90, 60, 40, 0.16);
+  color: #3d352b;
+  font: inherit;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  /* 只做位移，不缩放 —— 缩放会让静息态的 getBoundingClientRect 小于 44，
+     无障碍审计脚本量到的就不是真实命中尺寸 */
+  transform: translateY(4px);
+  transition:
+    opacity 0.16s ease-out,
+    transform 0.16s ease-out;
+}
+
+.hot3d__btn[data-on] {
+  opacity: 1;
+  transform: none;
+}
+
+/* 键盘焦点必须自己看得见：这一层是 pointer-events: none，
+   没有指针 hover 兜底，focus-visible 是唯一的可见反馈 */
+.hot3d__btn:focus-visible {
+  opacity: 1;
+  transform: none;
+  outline: 2px solid #b06a44;
+  outline-offset: 3px;
+}
+
+.hot3d__btn b {
+  font-family: var(--font-cn, inherit);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.hot3d__btn i {
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: #9a8f80;
+}
+
+/* ── 缩放控件（§11.2 / §15.4）────────────────────────────────
+   触屏没有滚轮、双指缩放又看不见，手机上没有这排键，
+   用户遇到的就是「柜子放大了退不回去」。所以它是功能，不是装饰。 */
+.zoomc {
+  position: absolute;
+  right: clamp(12px, 2.2vw, 26px);
+  bottom: clamp(14px, 3vh, 30px);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zoomc__b {
+  /* 44px 是触控目标下限，窄屏下不再缩 */
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(20, 32, 46, 0.14);
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: #575044;
+  font-size: 17px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(24, 40, 60, 0.12);
+  transition:
+    background-color 0.22s var(--ease-out, ease),
+    opacity 0.22s var(--ease-out, ease),
+    transform 0.22s var(--ease-out, ease);
+}
+
+.zoomc__b:hover:not(:disabled) {
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.zoomc__b:active:not(:disabled) {
+  transform: translateY(0) scale(0.94);
+}
+
+.zoomc__b:focus-visible {
+  outline: 2px solid #b06a44;
+  outline-offset: 3px;
+}
+
+/* 归位键在没缩放时是灰的：既告诉人这里能归位，又不误导说现在偏了 */
+.zoomc__b--reset {
+  font-size: 19px;
+}
+
+.zoomc__b:disabled {
+  opacity: 0.34;
+  cursor: default;
+}
+
+.zoomc__b--reset[data-on] {
+  background: #b06a44;
+  border-color: #b06a44;
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zoomc__b {
+    transition: none;
+  }
+}

@@ -1,0 +1,213 @@
+:root {
+  --paper: #f7f3ec;
+  --paper-warm: #fbf7f0;
+  --ink: #2e2a25;
+  --ink-soft: #5d554b;
+  --ink-faint: #a39a8c;
+  --cyan: #b06a44;
+  --cyan-deep: #92542f;
+  --lime: #ddc878;
+  --klein: #6b4f3c;
+  --red: #b35a3e;
+  --rust: #a85a38;
+  --cork: #9c6b42;
+
+  --font-ui: 'Inter', -apple-system, 'Helvetica Neue', sans-serif;
+  --font-cn: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-cn-serif: 'Noto Serif SC', 'Songti SC', serif;
+  --font-display: 'Playfair Display', 'Bodoni Moda', serif;
+  --font-poster: 'Ultra', 'Playfair Display', serif;
+  --font-slab: 'Alfa Slab One', serif;
+  --font-black: 'Archivo Black', 'Helvetica Neue', sans-serif;
+  --font-mono: 'Courier Prime', 'Courier New', monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* 焦点环：深色实环 + 浅色光晕，保证在纸面和蓝色柜腔上都可辨识。
+     局部需要反相时，在祖先上覆写这两个变量即可。 */
+  --focus-ring: #2e2a25;
+  --focus-halo: rgba(247, 243, 236, 0.95);
+
+  /* 最小触控目标（§11.2 / §16.4） */
+  --tap-min: 44px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+::selection {
+  background: var(--cyan);
+  color: #fff;
+}
+
+/* ── 光标：跟参考一致，用系统光标 ────────────────── */
+.scene {
+  cursor: grab;
+}
+
+.scene:active {
+  cursor: grabbing;
+}
+
+.hot,
+.nav__item,
+button,
+a {
+  cursor: pointer;
+}
+
+/* ── 焦点可见性（§16.4）────────────────────────────
+   1. 鼠标点击不留焦点框：只在 :focus-visible 时出环。
+   2. 选择器带元素名 / 属性，特异性高于组件里的
+      单类名 `outline: none`，避免焦点被组件样式吃掉。
+   3. 光晕用低特异性的 :where()，遇到自带 box-shadow
+      的元素会自动让位，不破坏原有阴影。 */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+a[href]:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role='button']:focus-visible,
+[role='link']:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+:where(
+  a[href],
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [role='button'],
+  [role='link'],
+  [tabindex]
+):focus-visible {
+  box-shadow: 0 0 0 5px var(--focus-halo);
+}
+
+/* ── 通用 ─────────────────────────────────────────── */
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.u-mono-label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 只读给屏幕阅读器 */
+.u-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── 触控目标（§11.2）─────────────────────────────────
+   用透明的 ::after 把命中区补足到 44×44，视觉尺寸和字号完全不变。
+   注意：占用元素的 ::after，元素本身已用 ::after 时改用别的方案。 */
+.u-tap-target {
+  position: relative;
+}
+
+.u-tap-target::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, var(--tap-min));
+  height: max(100%, var(--tap-min));
+  transform: translate(-50%, -50%);
+  background: transparent;
+  pointer-events: auto;
+}
+
+/* 触控设备上去掉点按时的灰块闪烁 */
+@media (pointer: coarse) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ── Reduced Motion（§11.3）───────────────────────────
+   关键点：不仅压缩时长，还必须把 delay 清零。
+   只压 duration 会留下「动画瞬间结束、却仍在等 delay」的空等待，
+   这是整改计划 §4.7 明确点名的问题。
+   时长保留 1ms 而不是 0，是为了让 animationend / transitionend
+   依然可靠触发，JS 侧等待完成事件的逻辑不会挂死。 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+}

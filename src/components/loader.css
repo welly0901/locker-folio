@@ -1,0 +1,220 @@
+.loader {
+  position: fixed;
+  inset: 0;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  z-index: 60;
+  overflow: hidden;
+}
+
+/* 背景里若隐若现的方块残影，为后面的马赛克揭幕做铺垫 */
+.loader__ghosts {
+  position: absolute;
+  inset: -4%;
+  background-image:
+    linear-gradient(90deg, rgba(176, 106, 68, 0.03) 1px, transparent 1px),
+    linear-gradient(rgba(176, 106, 68, 0.03) 1px, transparent 1px);
+  background-size: 101px 101px;
+  mask-image: radial-gradient(115% 90% at 50% 45%, #000 15%, transparent 78%);
+  animation: ghostDrift 9s linear infinite;
+}
+
+@keyframes ghostDrift {
+  to {
+    transform: translate3d(101px, 101px, 0);
+  }
+}
+
+.loader__word {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-poster);
+  font-weight: 400;
+  font-size: clamp(64px, 15.1vw, 234px);
+  line-height: 0.74;
+  letter-spacing: -0.012em;
+  transform: scaleY(1.02);
+  transform-origin: center;
+  user-select: none;
+  /* 字体就位前整块隐藏，避免细衬线回退跳成 Ultra 的 FOUT。
+     只改 opacity 不改 display，位置已经占好，出现时没有布局位移。
+     data-fontready 由 Loader 依据资源清单的字体阶段驱动，2.5s 超时兜底。 */
+  opacity: 0;
+  transition: opacity 0.16s linear;
+}
+
+.loader__word[data-fontready='true'] {
+  opacity: 1;
+}
+
+.loader__wordBase,
+.loader__wordFill {
+  display: block;
+}
+
+.loader__wordBase {
+  color: #e7dcc9;
+}
+
+.loader__wordFill {
+  position: absolute;
+  inset: 0;
+  color: var(--cyan);
+  will-change: clip-path;
+}
+
+.loader__pct {
+  position: absolute;
+  right: clamp(18px, 3.4vw, 46px);
+  bottom: clamp(14px, 3vw, 44px);
+  display: flex;
+  align-items: flex-start;
+  color: var(--cyan);
+  font-family: var(--font-ui);
+  font-weight: 300;
+  line-height: 0.84;
+  font-variant-numeric: tabular-nums;
+}
+
+.loader__num {
+  font-size: clamp(46px, 11vw, 165px);
+  letter-spacing: -0.02em;
+}
+
+.loader__sign {
+  font-size: clamp(18px, 3.9vw, 56px);
+  margin-top: 0.06em;
+  margin-left: 0.05em;
+}
+
+.loader__sig {
+  position: absolute;
+  left: clamp(18px, 3.4vw, 54px);
+  bottom: clamp(18px, 3.4vw, 42px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--cyan-deep);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+}
+
+.loader__sig i {
+  width: 5px;
+  height: 5px;
+  background: var(--cyan);
+  display: inline-block;
+}
+
+/* ── 资源失败：重试 / 降级继续（§7.1） ───────────────── */
+.loader__err {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(96px, 16vh, 168px);
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 48px));
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid rgba(176, 106, 68, 0.36);
+  box-shadow: 0 10px 30px rgba(20, 22, 26, 0.09);
+  color: var(--ink);
+  text-align: left;
+}
+
+.loader__errTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.loader__errList {
+  margin: 8px 0 0;
+  padding-left: 16px;
+  max-height: 96px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  word-break: break-all;
+}
+
+.loader__errActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.loader__errActions button {
+  /* 触控目标不小于 44px（§16.4） */
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--cyan-deep);
+  color: var(--cyan-deep);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: transparent;
+  transition: background-color 0.16s ease-out, color 0.16s ease-out;
+}
+
+.loader__errActions button:first-child {
+  background: var(--cyan-deep);
+  color: #fff;
+}
+
+.loader__errActions button:hover:not(:disabled) {
+  background: var(--cyan);
+  color: #fff;
+  border-color: var(--cyan);
+}
+
+.loader__errActions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.loader__errActions button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* ── 马赛克揭幕 ─────────────────────────────────────── */
+.reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  display: grid;
+  /* 揭幕层是 Canvas / 场景的同级遮罩，自己不建立会影响 preserve-3d 的父级 */
+  isolation: isolate;
+}
+
+.reveal__cell {
+  background: var(--cyan);
+  /* 相邻格之间的亚像素缝会漏出底色，用 1px 外扩把缝补上，避免白丝 */
+  box-shadow: 0 0 0 1px var(--cyan);
+  /* 不加常驻 will-change：91 格各自提层的代价大于收益，
+     opacity + transform 本身就走合成线程（§4.6） */
+}
+
+/* 主场景画满一帧之前保持整幅不透明，起播由 JS 的 data-armed 打开 */
+.reveal[data-armed='true'] .reveal__cell {
+  animation: cellOut var(--reveal-cell, 220ms) var(--ease-io) forwards;
+}
+
+@keyframes cellOut {
+  to {
+    opacity: 0;
+    /* 略微放大而不是缩小：碎开过程中格与格保持重叠，不会露出缝隙 */
+    transform: scale(1.06);
+  }
+}
+
+/* Reduced Motion 分支：整幅遮罩，淡出由 WAAPI 驱动（见 Reveal.tsx） */
+.reveal--flat {
+  background: var(--cyan);
+}

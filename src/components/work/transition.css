@@ -1,0 +1,45 @@
+/* 从作品子页面返回 SELECTED WORK 文件夹时的米黄色径向/波浪遮罩（方案 §10.3） */
+
+.wt {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  /* 过渡期间吞掉点击，避免连点触发第二次返回 */
+  pointer-events: auto;
+  overflow: hidden;
+  contain: layout paint;
+}
+
+/* 主遮罩：实心米黄圆盘，从按钮位置扩张到盖满视口 */
+.wt__disc {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 38%, #f6ecd6 0%, #efe1c2 58%, #e8d7b2 100%);
+  transform: translate(-50%, -50%) scale(0);
+  will-change: transform;
+}
+
+/* 领先半拍的柔边波峰，制造“波浪推过去”的层次 */
+.wt__wave {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(246, 236, 214, 0) 58%, rgba(238, 222, 186, 0.92) 78%, rgba(246, 236, 214, 0) 100%);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* 退场：从原点扩张出一个透明洞，遮罩像波纹一样向外散开 */
+.wt--out {
+  --wt-r: 0px;
+  -webkit-mask-image: radial-gradient(
+    circle at var(--wt-ox) var(--wt-oy),
+    transparent var(--wt-r),
+    #000 calc(var(--wt-r) + 88px)
+  );
+  mask-image: radial-gradient(
+    circle at var(--wt-ox) var(--wt-oy),
+    transparent var(--wt-r),
+    #000 calc(var(--wt-r) + 88px)
+  );
+}

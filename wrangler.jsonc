@@ -1,0 +1,13 @@
+{
+  "name": "locker-folio",
+  "compatibility_date": "2026-08-21",
+  // 纯静态站：没有 Worker 脚本，只把 vite 的产物目录整体托管。
+  "assets": {
+    "directory": "./dist",
+    // 站点只有 "/" 一条路由（其余状态都走查询参数），找不到的路径就老实 404，
+    // 不要回落到 index.html —— 那会让缺失的贴图以 200 + HTML 的形式返回，
+    // 把「素材 404」伪装成解码失败。
+    "not_found_handling": "none"
+  },
+  "routes": [{ "pattern": "locker.zezn.dev", "custom_domain": true }]
+}

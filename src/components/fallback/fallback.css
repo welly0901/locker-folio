@@ -1,0 +1,157 @@
+/* 无 WebGL / Save-Data / 低性能设备下的静态首屏（§11.4） */
+
+.fb {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 4vw, 56px);
+  background: var(--paper);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.fb__inner {
+  display: flex;
+  align-items: center;
+  gap: clamp(24px, 5vw, 64px);
+  width: min(1040px, 100%);
+}
+
+/* ── 静态柜体图 ─────────────────────────────────────── */
+
+.fb__figure {
+  flex: 1 1 52%;
+  margin: 0;
+  min-width: 0;
+}
+
+.fb__image {
+  width: 100%;
+  height: auto;
+  border-radius: 2px;
+}
+
+.fb__ph {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fb__ph-body {
+  display: flex;
+  gap: 4px;
+  aspect-ratio: 4 / 3;
+  padding: 10px;
+  background: #e7ddca;
+  border: 1px solid rgba(20, 22, 26, 0.1);
+}
+
+.fb__ph-door {
+  flex: 1;
+  background: #d9c9ac;
+  border: 1px solid rgba(20, 22, 26, 0.08);
+}
+
+/* 中间那扇是开着的柜腔，跟场景里第二扇门对应 */
+.fb__ph-door--open {
+  flex: 1.15;
+  background: #b09878;
+}
+
+.fb__ph-caption {
+  margin: 0;
+}
+
+/* ── 文本与入口 ─────────────────────────────────────── */
+
+.fb__panel {
+  flex: 1 1 40%;
+  min-width: 0;
+}
+
+.fb__kicker {
+  margin: 0 0 10px;
+}
+
+.fb__title {
+  margin: 0 0 12px;
+  font-family: var(--font-black);
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.fb__note {
+  margin: 0 0 22px;
+  max-width: 42ch;
+  font-family: var(--font-cn);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.fb__nav {
+  border-top: 1px solid rgba(20, 22, 26, 0.16);
+}
+
+.fb__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 触控目标：整行可点，高度固定 ≥56px，远高于 44px 下限 */
+.fb__entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: max(56px, var(--tap-min));
+  padding: 12px 2px;
+  border-bottom: 1px solid rgba(20, 22, 26, 0.16);
+  color: var(--ink);
+  text-align: left;
+}
+
+.fb__entry-label {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+}
+
+.fb__entry-arrow {
+  font-size: 14px;
+  color: var(--ink-faint);
+  transition: transform 0.32s var(--ease-out), color 0.32s var(--ease-out);
+}
+
+.fb__entry:hover .fb__entry-arrow,
+.fb__entry[data-active='true'] .fb__entry-arrow {
+  transform: translateX(4px);
+  color: var(--ink);
+}
+
+.fb__entry[data-active='true'] .fb__entry-label {
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .fb {
+    align-items: flex-start;
+  }
+
+  .fb__inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+  }
+
+  .fb__figure {
+    flex: none;
+  }
+}
